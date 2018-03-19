@@ -33,12 +33,19 @@ foreach($import in @($Public + $Private))
 {
     try
     {
-        . $import.fullname
-        Write-Debug $import.fullname;
+        Write-Debug "Verifying authenticode signature of $($import.fullname)";
+        if((Get-AuthenticodeSignature $import.fullname).Status -eq "Valid")
+        {
+            . $import.fullname
+        }
+        else
+        {
+            Write-Error -Message "Failed to import $($import.fullname) because the authenticode signature was not valid.";
+        }
     }
     catch
     {
-        Write-Error -Message "Failed to import function $($import.fullname): $_"
+        Write-Error -Message "Failed to import script $($import.fullname): $_"
     }
 }
 
