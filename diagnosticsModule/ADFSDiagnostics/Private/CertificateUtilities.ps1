@@ -26,7 +26,7 @@ Function Create-CertificateCheckResult
         $testName,
         [ResultType]
         $result,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string]
         $detail = $null
     )
@@ -90,7 +90,7 @@ Function Get-AdfsCertificateList([switch] $RemovePrivateKey)
 
     $adfsTokenCerts = Get-AdfsCertificate
 
-    foreach($adfsTokenCert in $adfsTokenCerts)
+    foreach ($adfsTokenCert in $adfsTokenCerts)
     {
         $certToAdd = new-Object PSObject
         if ($RemovePrivateKey)
@@ -142,7 +142,7 @@ Function Get-AdfsCertificatesToTest()
 
     if ($skipCommCert)
     {
-         $adfsCertificateCollection = $adfsCertificateCollection | where {$_.CertificateType -ne "Service-Communications"}
+        $adfsCertificateCollection = $adfsCertificateCollection | where {$_.CertificateType -ne "Service-Communications"}
     }
 
     return $adfsCertificateCollection
@@ -166,11 +166,11 @@ function VerifyCertificateCRL($cert, $revocationCheckSetting)
 {
     if ( $null -eq $cert )
     {
-      return $null
+        return $null
     }
 
     $certSubject = $cert.Subject
-    $isSelfSigned =  $certSubject -eq $cert.IssuerName.Name
+    $isSelfSigned = $certSubject -eq $cert.IssuerName.Name
 
     if ($isSelfSigned)
     {
@@ -199,7 +199,7 @@ function VerifyCertificateCRL($cert, $revocationCheckSetting)
         $chain.ChainPolicy.UrlRetrievalTimeout = New-TimeSpan -Seconds 10
         $chain.ChainPolicy.VerificationFlags = "AllowUnknownCertificateAuthority"
 
-        switch($revocationCheckSetting)
+        switch ($revocationCheckSetting)
         {
             "CheckEndCert"
             {
@@ -244,7 +244,7 @@ function VerifyCertificateCRL($cert, $revocationCheckSetting)
     }
 
     $certSubject = $cert.Subject
-    $isSelfSigned =  $certSubject -eq $cert.IssuerName.Name
+    $isSelfSigned = $certSubject -eq $cert.IssuerName.Name
 
     $result = new-Object -TypeName PSObject
     $result | Add-Member -MemberType NoteProperty -Name Subject -Value $cert.Subject

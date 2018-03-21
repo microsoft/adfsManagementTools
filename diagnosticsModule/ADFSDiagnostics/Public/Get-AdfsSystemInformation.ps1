@@ -27,7 +27,7 @@ Function Get-AdfsSystemInformation()
     $timeZone = [System.TimeZone]::CurrentTimeZone.StandardName;
     $systemOutput | Add-Member NoteProperty -name "OSName" -value (Get-WmiObject Win32_OperatingSystem).Caption -Force;
     $systemOutput | Add-Member NoteProperty -name "MachineDomain" -value (Get-WmiObject Win32_ComputerSystem).Domain -Force;
-    $systemOutput | Add-Member NoteProperty -name "IPAddress" -value (Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" | where{$_.IPEnabled -eq "True"}).IPAddress[0] -Force;
+    $systemOutput | Add-Member NoteProperty -name "IPAddress" -value (Get-WmiObject Win32_NetworkAdapterConfiguration -Namespace "root\CIMV2" | where {$_.IPEnabled -eq "True"}).IPAddress[0] -Force;
     $systemOutput | Add-Member NoteProperty -name "TimeZone" -value $timeZone -Force;
     $systemOutput | Add-Member NoteProperty -name "LastRebootTime" -value $operatingSystem.ConvertToDateTime($operatingSystem.LastBootUpTime).ToUniversalTime() -Force;
     $systemOutput | Add-Member NoteProperty -name "MachineType" -value $computerSystem.Model -Force;
@@ -106,7 +106,7 @@ Function Get-AdfsSystemInformation()
     $bindingsStr = netsh http show sslcert
 
     #remove all title/extra lines
-    $bindingsStr = $bindingsStr | Foreach{$tok = $_.Split(":"); IF ($tok.Length -gt 1 -and $tok[1].TrimEnd() -ne "" -and $tok[0].StartsWith(" ")){$_}}
+    $bindingsStr = $bindingsStr | Foreach {$tok = $_.Split(":"); IF ($tok.Length -gt 1 -and $tok[1].TrimEnd() -ne "" -and $tok[0].StartsWith(" ")) {$_}}
 
     foreach ($bindingLine in $bindingsStr)
     {
@@ -140,8 +140,8 @@ Function Get-AdfsSystemInformation()
     $systemOutput | Add-Member NoteProperty -name "Role" -value $role -Force;
 
     #Get the top 10 with the highest private working set memory, adding the percentage of total
-    $processes = gwmi -Class Win32_PerfRawData_PerfProc_Process -Property @("Name","WorkingSetPrivate")
-    $top10ProcessesByMemory = $processes | sort WorkingSetPrivate -Descending | Where-Object {$_.Name -ne "_Total"} | Select-Object -First 10 Name,@{Name="MemoryInMB";Expression = {$_.WorkingSetPrivate / 1Mb}},@{Name="MemoryPercentOfTotal";Expression = {100 * $_.WorkingSetPrivate / $totalMemory}}
+    $processes = gwmi -Class Win32_PerfRawData_PerfProc_Process -Property @("Name", "WorkingSetPrivate")
+    $top10ProcessesByMemory = $processes | sort WorkingSetPrivate -Descending | Where-Object {$_.Name -ne "_Total"} | Select-Object -First 10 Name, @{Name = "MemoryInMB"; Expression = {$_.WorkingSetPrivate / 1Mb}}, @{Name = "MemoryPercentOfTotal"; Expression = {100 * $_.WorkingSetPrivate / $totalMemory}}
     $systemOutput | Add-Member NoteProperty -name "Top10ProcessesByMemory" -value $top10ProcessesByMemory -Force;
 
     #get ADHealthAgent update information
@@ -156,7 +156,7 @@ Function Get-AdfsSystemInformation()
 
     $NotFound = "NotFound";
     $LastUpdateAttemptTimeLong = GetAdHealthAgentRegistryKeyValue -ValueName ([RegistryValueName]::LastUpdateAttempt) -DefaultValue $NotFound
-    if($LastUpdateAttemptTimeLong -eq $NotFound)
+    if ($LastUpdateAttemptTimeLong -eq $NotFound)
     {
         #use DateTime.min as LastUpdateAttempt value if it is not found in registry
         $systemOutput.AdHealthAgentInformation.LastUpdateAttemptTime = [dateTime]::MinValue
@@ -164,7 +164,7 @@ Function Get-AdfsSystemInformation()
     else
     {
         #convert from filetime to utc
-        $LastUpdateAttemptUTC =  [datetime]::FromFileTime($LastUpdateAttemptTimeLong).ToUniversalTime()
+        $LastUpdateAttemptUTC = [datetime]::FromFileTime($LastUpdateAttemptTimeLong).ToUniversalTime()
         $systemOutput.AdHealthAgentInformation.LastUpdateAttemptTime = $LastUpdateAttemptUTC
     }
 

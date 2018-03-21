@@ -22,7 +22,6 @@ Function Test-CertificateAvailable
         return Create-CertificateCheckResult -cert $null -testName $testName -result NotRun -detail $notRunReason
     }
 
-
     try
     {
         $thumbprint = $adfsCertificate.Thumbprint
@@ -32,8 +31,8 @@ Function Test-CertificateAvailable
 
         if ($adfsCertificate.StoreLocation -eq "LocalMachine")
         {
-            $certStore = New-Object System.Security.Cryptography.X509Certificates.X509Store($adfsCertificate.StoreName,`
-                [System.Security.Cryptography.X509Certificates.StoreLocation]::LocalMachine)
+            $certStore = New-Object System.Security.Cryptography.X509Certificates.X509Store($adfsCertificate.StoreName, `
+                    [System.Security.Cryptography.X509Certificates.StoreLocation]::LocalMachine)
             try
             {
                 $certStore.Open("IncludeArchived")
@@ -139,7 +138,6 @@ function Test-CertificateAboutToExpire
     $testName = Create-CertCheckName -certType $certificateType -checkName $checkName -isPrimary $isPrimary
 
     $expiryLimitInDays = 90;
-
 
     if (-not $cert -and [String]::IsNullOrEmpty($notRunReason))
     {
@@ -336,7 +334,7 @@ function Test-CertificateCRL
         if ($crlResult.ChainStatus)
         {
             $testResult.Output.Set_Item($chainStatusKey, $crlResult.ChainStatus)
-            foreach($chainStatus in $crlResult.ChainStatus)
+            foreach ($chainStatus in $crlResult.ChainStatus)
             {
                 $testDetail = $testDetail + $chainStatus.Status + "-" + $chainStatus.StatusInformation + [System.Environment]::NewLine
             }

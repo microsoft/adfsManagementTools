@@ -42,7 +42,7 @@ Function Get-AdfsServerTrace
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string]
         $ActivityId,

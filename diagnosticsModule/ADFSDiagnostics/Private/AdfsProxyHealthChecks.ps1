@@ -1,9 +1,9 @@
 Function TestSTSReachableFromProxy()
 {
-   $testName = "STSReachableFromProxy"
-   $exceptionKey = "STSReachableFromProxyException"
-   try
-   {
+    $testName = "STSReachableFromProxy"
+    $exceptionKey = "STSReachableFromProxyException"
+    try
+    {
         $mexUrlTestResult = New-Object TestResult -ArgumentList($testName);
         $mexUrlTestResult.Output = @{$exceptionKey = "NONE"}
 
@@ -11,7 +11,7 @@ Function TestSTSReachableFromProxy()
 
         $stsHost = $proxyInfo.HostName + ":" + $proxyInfo.HostHttpsPort
 
-        $mexUrl = "https://"+ $stsHost + "/adfs/services/trust/mex";
+        $mexUrl = "https://" + $stsHost + "/adfs/services/trust/mex";
         $webClient = New-Object net.WebClient;
         try
         {
@@ -26,15 +26,13 @@ Function TestSTSReachableFromProxy()
             $mexUrlTestResult.Output.Set_Item($exceptionKey, $exceptionEncoded)
         }
         return $mexUrlTestResult;
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList ($testName)
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList ($testName)
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
-
-
+    }
 }

@@ -34,38 +34,38 @@ Function Start-AdfsServerTrace
 {
     [CmdletBinding()]
     param
-  (
-        [Parameter(Mandatory=$true)]
+    (
+        [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-    [string]
-    $ActivityId,
+        [string]
+        $ActivityId,
 
         [switch]
         $IncludeDebug,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string[]]
         $ComputerName
-  )
+    )
 
     #script block that gathers events from Debug and Admin logs
     $getEventWorker = {
         param([string]$sourceType, [string]$activityId, [string]$computerName)
 
         #common columns to return
-        $idExpression = @{ label='EventId'; Expression={$_.Id } }
-      $timeExpression = @{ label='TimeCreated'; Expression={ $_.TimeCreated } }
-      $eventRecordIDExpression = @{ label='EventRecordID'; Expression={[System.Convert]::ToInt32((([xml]$_.ToXml()).Event.System.EventRecordId)) } }
-      $messageExpression = @{ label='Message'; Expression={$_.Message} }
-      $detailsExpression = @{ label='Details'; Expression={if ($_.Message -ne $_.properties[0].value) { $_.properties[0].value } else { "" } } }
-      $details2Expression = @{ label='Details2'; Expression={$_.properties[1].value } }
-        $computerNameExpression = @{ label='ComputerName'; Expression={ $computerName } }
-        $sourceExpression = @{ label='Source'; Expression={$sourceType} }
-        $activityIdExpression = @{ label='ActivityId'; Expression={$_.ActivityId} }
+        $idExpression = @{ label = 'EventId'; Expression = {$_.Id } }
+        $timeExpression = @{ label = 'TimeCreated'; Expression = { $_.TimeCreated } }
+        $eventRecordIDExpression = @{ label = 'EventRecordID'; Expression = {[System.Convert]::ToInt32((([xml]$_.ToXml()).Event.System.EventRecordId)) } }
+        $messageExpression = @{ label = 'Message'; Expression = {$_.Message} }
+        $detailsExpression = @{ label = 'Details'; Expression = {if ($_.Message -ne $_.properties[0].value) { $_.properties[0].value } else { "" } } }
+        $details2Expression = @{ label = 'Details2'; Expression = {$_.properties[1].value } }
+        $computerNameExpression = @{ label = 'ComputerName'; Expression = { $computerName } }
+        $sourceExpression = @{ label = 'Source'; Expression = {$sourceType} }
+        $activityIdExpression = @{ label = 'ActivityId'; Expression = {$_.ActivityId} }
 
         if ($sourceType -eq "Admin")
         {
-            $sortKeyExpression= @{ label='SortKey'; Expression={ 2 } }
+            $sortKeyExpression = @{ label = 'SortKey'; Expression = { 2 } }
             $adfs2SourceName = "AD FS 2.0/Admin"
             $adfs3SourceName = "AD FS/Admin"
             $oldest = $false
@@ -73,84 +73,84 @@ Function Start-AdfsServerTrace
 
         if ($sourceType -eq "Debug")
         {
-            $sortKeyExpression= @{ label='SortKey'; Expression={ 3 } }
+            $sortKeyExpression = @{ label = 'SortKey'; Expression = { 3 } }
             $adfs2SourceName = "AD FS 2.0 Tracing/Debug"
             $adfs3SourceName = "AD FS Tracing/Debug"
             $oldest = $true
         }
 
         [System.Guid]$activityGuid = [System.Guid]::Parse($activityId)
-      $normalizedGuid =  $activityGuid.ToString("B").ToUpper()
+        $normalizedGuid = $activityGuid.ToString("B").ToUpper()
         $xpathFilter = "*[System/Correlation[@ActivityID='$normalizedGuid']]"
 
         $results = Get-WinEvent -LogName $adfs2SourceName -Oldest:$oldest -FilterXPath $xpathFilter -MaxEvents 100 -ErrorAction SilentlyContinue -ComputerName $computerName -ErrorVariable $errorVar
         $results = $results + [array](Get-WinEvent -LogName $adfs3SourceName -Oldest:$oldest -FilterXPath $xpathFilter -MaxEvents 100 -ErrorAction SilentlyContinue -ComputerName $computerName -ErrorVariable $errorVar)
 
         Write-Output $results | Select-Object $computerNameExpression,
-                                              $sourceExpression,
-                                              $sortKeyExpression,
-                                              $idExpression,
-                                              $timeExpression,
-                                              $eventRecordIDExpression,
-                                              $messageExpression,
-                                              $detailsExpression,
-                                              $details2Expression
+        $sourceExpression,
+        $sortKeyExpression,
+        $idExpression,
+        $timeExpression,
+        $eventRecordIDExpression,
+        $messageExpression,
+        $detailsExpression,
+        $details2Expression
     }
 
     #script block that gathers security audits
     $getAuditsWorker = {
         param([string]$activityId, [string]$computerName)
         [System.Guid]$activityGuid = [System.Guid]::Parse($activityId)
-      $normalizedGuidForAudits =  $activityGuid.ToString()
+        $normalizedGuidForAudits = $activityGuid.ToString()
         $xpathFilterAudits = "*[EventData[Data='$normalizedGuidForAudits']]"
 
-        $idExpression = @{ label='EventId'; Expression={$_.Id } }
-      $timeExpression = @{ label='TimeCreated'; Expression={ $_.TimeCreated } }
-      $eventRecordIDExpression = @{ label='EventRecordID'; Expression={[System.Convert]::ToInt32((([xml]$_.ToXml()).Event.System.EventRecordId)) } }
-      $messageExpression = @{ label='Message'; Expression={$_.Message} }
-      $detailsExpression = @{ label='Details'; Expression={if ($_.Message -ne $_.properties[0].value) { $_.properties[0].value } else { "" } } }
-      $details2Expression = @{ label='Details2'; Expression={$_.properties[1].value } }
-        $computerNameExpression = @{ label='ComputerName'; Expression={ $computerName } }
-        $sourceAuditExpression = @{ label='Source'; Expression={"Audits"} }
-        $sortKeyExpression= @{ label='SortKey'; Expression={ 1 } }
+        $idExpression = @{ label = 'EventId'; Expression = {$_.Id } }
+        $timeExpression = @{ label = 'TimeCreated'; Expression = { $_.TimeCreated } }
+        $eventRecordIDExpression = @{ label = 'EventRecordID'; Expression = {[System.Convert]::ToInt32((([xml]$_.ToXml()).Event.System.EventRecordId)) } }
+        $messageExpression = @{ label = 'Message'; Expression = {$_.Message} }
+        $detailsExpression = @{ label = 'Details'; Expression = {if ($_.Message -ne $_.properties[0].value) { $_.properties[0].value } else { "" } } }
+        $details2Expression = @{ label = 'Details2'; Expression = {$_.properties[1].value } }
+        $computerNameExpression = @{ label = 'ComputerName'; Expression = { $computerName } }
+        $sourceAuditExpression = @{ label = 'Source'; Expression = {"Audits"} }
+        $sortKeyExpression = @{ label = 'SortKey'; Expression = { 1 } }
 
         $auditTraces = Get-WinEvent -LogName "Security" -Oldest -FilterXPath $xpathFilterAudits -ErrorAction SilentlyContinue -ComputerName $computerName
 
         $results = $auditTraces
 
-      #audits also have instance ID. To harvest those, let's find the data1 fields that are like a guid and are not the activity id
-      $instanceIds = $auditTraces | where { $_.Details -match "[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}" -and $_.Details -ne $normalizedGuidForAudits } | Select-Object  -ExpandProperty Details -Unique
-      foreach ($instanceId in $instanceIds)
-      {
-        $xpathFilterAuditsByInstId = "*[EventData[Data='$instanceId']]"
-        $results = $results + [array](Get-WinEvent -LogName "Security" -Oldest -FilterXPath $xpathFilterAuditsByInstId -ErrorAction SilentlyContinue -ComputerName $computerName)
-      }
+        #audits also have instance ID. To harvest those, let's find the data1 fields that are like a guid and are not the activity id
+        $instanceIds = $auditTraces | where { $_.Details -match "[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-F0-9]{12}" -and $_.Details -ne $normalizedGuidForAudits } | Select-Object  -ExpandProperty Details -Unique
+        foreach ($instanceId in $instanceIds)
+        {
+            $xpathFilterAuditsByInstId = "*[EventData[Data='$instanceId']]"
+            $results = $results + [array](Get-WinEvent -LogName "Security" -Oldest -FilterXPath $xpathFilterAuditsByInstId -ErrorAction SilentlyContinue -ComputerName $computerName)
+        }
 
         Write-Output $results | Select-Object $computerNameExpression,
-                                              $sourceAuditExpression,
-                                              $sortKeyExpression,
-                                              $idExpression,
-                                              $timeExpression,
-                                              $eventRecordIDExpression,
-                                              $messageExpression,
-                                              $detailsExpression,
-                                              $details2Expression
+        $sourceAuditExpression,
+        $sortKeyExpression,
+        $idExpression,
+        $timeExpression,
+        $eventRecordIDExpression,
+        $messageExpression,
+        $detailsExpression,
+        $details2Expression
     }
-    $jobs=@()
+    $jobs = @()
 
     $activity = "Getting AD FS request details for ActivityId=$activityId"
 
     Write-Progress -Activity $activity -Status "Querying event logs in parallel"
-    foreach($server in $computerName)
+    foreach ($server in $computerName)
     {
         $jobs = [array]$jobs + (Start-Job -Name $server+"-Admin" -ScriptBlock $getEventWorker -ArgumentList @("Admin", $activityId, $server))
 
         if ($includeDebug)
         {
-          $jobs = [array]$jobs + (Start-Job -Name $server+"-Trace" -ScriptBlock $getEventWorker -ArgumentList @("Debug", $activityId, $server))
+            $jobs = [array]$jobs + (Start-Job -Name $server+"-Trace" -ScriptBlock $getEventWorker -ArgumentList @("Debug", $activityId, $server))
         }
 
-      $jobs = [array]$jobs + [array](Start-Job -Name $server+"-Audit" -ScriptBlock $getAuditsWorker -ArgumentList @($activityId, $server))
+        $jobs = [array]$jobs + [array](Start-Job -Name $server+"-Audit" -ScriptBlock $getAuditsWorker -ArgumentList @($activityId, $server))
     }
 
     Write-Output $jobs

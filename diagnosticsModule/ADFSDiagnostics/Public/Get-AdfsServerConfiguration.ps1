@@ -40,11 +40,13 @@ Function Get-AdfsServerConfiguration
 
     $adfsSyncProperties = $null
 
-    try {
+    try
+    {
         $adfsSyncProperties = Get-AdfsSyncProperties -ErrorVariable adfsSyncProperties;
         $configurationOutput | Add-Member NoteProperty -name "ADFSSyncProperties" -value $adfsSyncProperties -Force;
     }
-    catch [Exception] {
+    catch [Exception]
+    {
         $configurationOutput | Add-Member NoteProperty -name "ADFSSyncProperties" -value "SCRIPTERROR: $_.Exception.Message" -Force;
     }
 
@@ -59,83 +61,103 @@ Function Get-AdfsServerConfiguration
 
         If ($IncludeTrusts)
         {
-            try {
+            try
+            {
                 $adfsClaimsProviderTrust = Get-AdfsClaimsProviderTrust -ErrorVariable adfsClaimsProviderTrust;
                 $configurationOutput | Add-Member NoteProperty -name "ADFSClaimsProviderTrust" -value $AdfsClaimsProviderTrust -Force;
             }
-            catch [Exception] {
+            catch [Exception]
+            {
                 $configurationOutput | Add-Member NoteProperty -name "ADFSClaimsProviderTrust" -value "SCRIPTERROR: $_.Exception.Message" -Force;
             }
-            try {
+            try
+            {
                 $adfsRelyingPartyTrust = Get-AdfsRelyingPartyTrust -ErrorVariable adfsRelyingPartyTrust;
                 $configurationOutput | Add-Member NoteProperty -name "ADFSRelyingPartyTrust" -value $adfsRelyingPartyTrust -Force;
             }
-            catch [Exception] {
+            catch [Exception]
+            {
                 $configurationOutput | Add-Member NoteProperty -name "ADFSRelyingPartyTrust" -value "SCRIPTERROR: $_.Exception.Message" -Force;
             }
         }
-        try {
+        try
+        {
             $adfsAttributeStore = Get-AdfsAttributeStore -ErrorVariable adfsAttributeStore;
             $configurationOutput | Add-Member NoteProperty -name "ADFSAttributeStore" -value $adfsAttributeStore -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSAttributeStore" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
-        try {
+        try
+        {
             $adfsCertificateCollection = Get-AdfsCertificateList -RemovePrivateKey
             $configurationOutput | Add-Member NoteProperty -name "ADFSCertificate" -value $adfsCertificateCollection -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSCertificate" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
-        try {
+        try
+        {
             $adfsClaimDescription = Get-AdfsClaimDescription -ErrorVariable adfsClaimDescription;
             $configurationOutput | Add-Member NoteProperty -name "ADFSClaimDescription" -value $adfsClaimDescription -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSClaimDescription" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
-        try {
+        try
+        {
             $adfsEndpoint = Get-AdfsEndpoint -ErrorVariable adfsEndpoint;
             $configurationOutput | Add-Member NoteProperty -name "ADFSEndpoint" -value $adfsEndpoint -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSEndpoint" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
-        try {
+        try
+        {
             $adfsProperties = Retrieve-AdfsProperties
             $configurationOutput | Add-Member NoteProperty -name "ADFSProperties" -value $adfsProperties -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSProperties" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
-        try {
+        try
+        {
             $adfsClaimsProviderTrustCount = 0
             $adfsRelyingPartyTrustCount = (Get-AdfsRelyingPartyTrust).Count;
 
             $configurationOutput | Add-Member NoteProperty -name "ADFSRelyingPartyTrustCount" -value $adfsRelyingPartyTrustCount -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSRelyingPartyTrustCount" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
-        try {
+        try
+        {
             $adfsClaimsProviderTrustCount = 0
             $adfsClaimsProviderTrustCount = (Get-AdfsClaimsProviderTrust).Count;
 
             $configurationOutput | Add-Member NoteProperty -name "ADFSClaimsProviderTrustCount" -value $adfsClaimsProviderTrustCount -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSClaimsProviderTrustCount" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
-        try {
+        try
+        {
             $adfSConfigurationDatabaseConnectionString = (Get-WmiObject -namespace root/ADFS -class SecurityTokenService).Properties["ConfigurationDatabaseConnectionString"].Value
             $configurationOutput | Add-Member NoteProperty -name "ADFSConfigurationDatabaseConnectionString" -value $adfSConfigurationDatabaseConnectionString -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "ADFSConfigurationDatabaseConnectionStringy" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
@@ -145,9 +167,10 @@ Function Get-AdfsServerConfiguration
         $ADFSVersion = Get-AdfsVersion($OSVersion);
         $configurationOutput | Add-Member NoteProperty -name "AdfsVersion" -value $ADFSVersion -Force;
 
-        try {
+        try
+        {
             $aadRpId = "urn:federation:MicrosoftOnline";
-            $aadRp =  Get-ADFSRelyingPartyTrust -Identifier $aadRpId;
+            $aadRp = Get-ADFSRelyingPartyTrust -Identifier $aadRpId;
             $aadRpStatus = ""
 
             if ($aadRp -eq $null)
@@ -167,7 +190,8 @@ Function Get-AdfsServerConfiguration
             }
             $configurationOutput | Add-Member NoteProperty -name "AadTrustStatus" -value $aadRpStatus -Force;
         }
-        catch [Exception] {
+        catch [Exception]
+        {
             $configurationOutput | Add-Member NoteProperty -name "AadTrustStatus" -value "SCRIPTERROR: $_.Exception.Message" -Force;
         }
 
@@ -175,35 +199,43 @@ Function Get-AdfsServerConfiguration
         {
             $adfs3
             {
-                try {
+                try
+                {
                     $adfsAdditionalAuthenticationRule = Get-AdfsAdditionalAuthenticationRule -ErrorVariable adfsAdditionalAuthenticationRule;
                     $configurationOutput | Add-Member NoteProperty -name "ADFSAdditionalAuthenticationRule" -value $adfsAdditionalAuthenticationRule -Force;
                 }
-                catch [Exception] {
+                catch [Exception]
+                {
                     $configurationOutput | Add-Member NoteProperty -name "ADFSAdditionalAuthenticationRule" -value "SCRIPTERROR: $_.Exception.Message" -Force;
                 }
-                try {
+                try
+                {
                     $adfsClient = Get-AdfsClient -ErrorVariable adfsClient;
                     $configurationOutput | Add-Member NoteProperty -name "ADFSClient" -value $adfsClient -Force;
                 }
-                catch [Exception] {
+                catch [Exception]
+                {
                     $configurationOutput | Add-Member NoteProperty -name "ADFSClient" -value "SCRIPTERROR: $_.Exception.Message" -Force;
                 }
 
 
-                try {
+                try
+                {
                     $adfsGlobalAuthenticationPolicy = Get-AdfsGlobalAuthenticationPolicy -ErrorVariable adfsGlobalAuthenticationPolicy;
                     $configurationOutput | Add-Member NoteProperty -name "ADFSGlobalAuthenticationPolicy" -value $adfsGlobalAuthenticationPolicy -Force;
                 }
-                catch [Exception] {
+                catch [Exception]
+                {
                     $configurationOutput | Add-Member NoteProperty -name "ADFSGlobalAuthenticationPolicy" -value "SCRIPTERROR: $_.Exception.Message" -Force;
                 }
 
-                try {
+                try
+                {
                     $adfsDeviceRegistration = Get-AdfsDeviceRegistration -ErrorVariable adfsDeviceRegistration;
                     $configurationOutput | Add-Member NoteProperty -name "ADFSDeviceRegistration" -value $adfsDeviceRegistration -Force;
                 }
-                catch [Exception] {
+                catch [Exception]
+                {
                     $configurationOutput | Add-Member NoteProperty -name "ADFSDeviceRegistration" -value "SCRIPTERROR: $_.Exception.Message" -Force;
                 }
             }
@@ -215,7 +247,7 @@ Function Get-AdfsServerConfiguration
                     $adfsGlobalAuthenticationPolicy = @{};
                     $iisSites = Get-ChildItem IIS:\Sites
                     $webConfigPath = $null
-                    foreach($site in $iisSites)
+                    foreach ($site in $iisSites)
                     {
                         $name = $site.Name
                         $adfsDefaultSite = dir IIS:\Sites\$name | where {$_.Name -eq 'adfs\ls'}
@@ -233,7 +265,7 @@ Function Get-AdfsServerConfiguration
                             $authMethods = $adfsLsWebConfig.SelectNodes("//localAuthenticationTypes/add")
                             if ($authMethods -ne $null)
                             {
-                                Foreach($authenticationMethod in $authMethods)
+                                Foreach ($authenticationMethod in $authMethods)
                                 {
                                     if (!($adfsGlobalAuthenticationPolicy.ContainsKey($authenticationMethod.name)))
                                     {
@@ -245,7 +277,8 @@ Function Get-AdfsServerConfiguration
                     }
                     $configurationOutput | Add-Member NoteProperty -name "ADFSGlobalAuthenticationPolicy" -value $adfsGlobalAuthenticationPolicy -Force;
                 }
-                catch [Exception] {
+                catch [Exception]
+                {
                     $configurationOutput | Add-Member NoteProperty -name "ADFSGlobalAuthenticationPolicy" -value "SCRIPTERROR: $_.Exception.Message" -Force;
                 }
             }

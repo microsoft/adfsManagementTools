@@ -17,7 +17,7 @@ Function Create-NotRunExceptionTestResult
         [string]
         $exceptionMessage
     )
-    $testResult= New-Object TestResult -ArgumentList($testName);
+    $testResult = New-Object TestResult -ArgumentList($testName);
     $testResult.Result = [ResultType]::NotRun;
     $testResult.Detail = $exceptionMessage;
     $testResult.ExceptionMessage = $exceptionMessage
@@ -29,7 +29,7 @@ Function Invoke-TestFunctions($role, [array]$functionsToRun)
     $results = @()
     $totalFunctions = $functionsToRun.Count
     $functionCount = 0
-    foreach($function in $functionsToRun)
+    foreach ($function in $functionsToRun)
     {
         $functionCount++
         $percent = 100 * $functionCount / $totalFunctions
@@ -71,29 +71,28 @@ Function TestAdfsSTSHealth()
         #do nothing, other than prevent the error record to go to the pipeline
     }
 
-
     $functionsToRun = @( `
-        "TestIsAdfsRunning", `
-        "TestIsWidRunning", `
-        "TestPingFederationMetadata", `
-        "TestSslBindings", `
-        "Test-AdfsCertificates", `
-        "TestADFSDNSHostAlias", `
-        "TestADFSDuplicateSPN", `
-        "TestServiceAccountProperties", `
-        "TestAppPoolIDMatchesServiceID", `
-        "TestComputerNameEqFarmName", `
-        "TestSSLUsingADFSPort", `
-        "TestSSLCertSubjectContainsADFSFarmName", `
-        "TestAdfsAuditPolicyEnabled", `
-        "TestAdfsRequestToken");
+            "TestIsAdfsRunning", `
+            "TestIsWidRunning", `
+            "TestPingFederationMetadata", `
+            "TestSslBindings", `
+            "Test-AdfsCertificates", `
+            "TestADFSDNSHostAlias", `
+            "TestADFSDuplicateSPN", `
+            "TestServiceAccountProperties", `
+            "TestAppPoolIDMatchesServiceID", `
+            "TestComputerNameEqFarmName", `
+            "TestSSLUsingADFSPort", `
+            "TestSSLCertSubjectContainsADFSFarmName", `
+            "TestAdfsAuditPolicyEnabled", `
+            "TestAdfsRequestToken");
 
     if ($verifyO365 -eq $true)
     {
         $functionsToRun = $functionsToRun + @( `
-        "TestOffice365Endpoints"
-        "TestADFSO365RelyingParty"
-        "TestNtlmOnlySupportedClientAtProxyEnabled" )
+            "TestOffice365Endpoints"
+            "TestADFSO365RelyingParty"
+            "TestNtlmOnlySupportedClientAtProxyEnabled" )
     }
 
     Invoke-TestFunctions -role "STS" -functionsToRun $functionsToRun

@@ -4,7 +4,7 @@ Function IsAdfsSyncPrimaryRole([switch] $force)
     {
         try
         {
-            $stsrole =  Get-ADFSSyncProperties | Select-Object -ExpandProperty Role
+            $stsrole = Get-ADFSSyncProperties | Select-Object -ExpandProperty Role
             $script:isAdfsSyncPrimaryRole = $stsrole -eq "PrimaryComputer"
         }
         catch
@@ -169,7 +169,7 @@ Function GetSslBinding()
 
     if ( $adfsVersion -eq $adfs2x)
     {
-        $portRegExp = "^.*" + ":" + $httpsPort.ToString()+ "$";
+        $portRegExp = "^.*" + ":" + $httpsPort.ToString() + "$";
 
         $bindingRegKeys = dir hklm:\system\currentcontrolset\services\http\parameters\SslBindingInfo -ErrorAction SilentlyContinue | where {$_.Name -match $portRegExp}
 
@@ -195,8 +195,8 @@ Function GetSslBinding()
             $hostNamePort = $bindingHost.ToString() + ":" + $httpsPort.ToString()
 
             $thumbprintBytes = $bindingProps.SslCertHash;
-            $thumbprint =""
-            $thumbprintBytes | %{ $thumbprint = $thumbprint + $_.ToString("X2"); }
+            $thumbprint = ""
+            $thumbprintBytes | % { $thumbprint = $thumbprint + $_.ToString("X2"); }
 
             $sslCert = dir Cert:\LocalMachine\My\$thumbprint -ErrorAction SilentlyContinue
 
@@ -207,8 +207,6 @@ Function GetSslBinding()
             $result | Add-Member NoteProperty -name "HostNamePort" -value $hostNamePort
             $result | Add-Member NoteProperty -name "Thumbprint" -value $thumbprint
             $result | Add-Member NoteProperty -name "Certificate" -value $sslCert
-
-
 
             return $result
         }
@@ -253,11 +251,10 @@ Function GetAdfsCertificatesToCheck($primaryFilter)
     return $adfsCertificates
 }
 
-
 function GetAdHealthAgentRegistryKeyValue($valueName, $defaultValue)
 {
     $agentRegistryValue = Get-ItemProperty -path $AdHealthAgentRegistryKeyPath -Name $valueName -ErrorAction SilentlyContinue
-    if($agentRegistryValue -eq $null)
+    if ($agentRegistryValue -eq $null)
     {
         return $defaultValue;
     }
@@ -266,8 +263,6 @@ function GetAdHealthAgentRegistryKeyValue($valueName, $defaultValue)
         return $agentRegistryValue.$valueName;
     }
 }
-
-
 
 Function IsLocalUser
 {

@@ -1,11 +1,11 @@
 # Windows Internal Database Service State if it is used by ADFS
 Function TestIsWidRunning()
 {
-   $testName = "IsWidRunning"
-   $serviceStateKey = "WIDServiceState"
-   $serviceStartModeKey = "WIDServiceStartMode"
-   try
-   {
+    $testName = "IsWidRunning"
+    $serviceStateKey = "WIDServiceState"
+    $serviceStartModeKey = "WIDServiceStartMode"
+    try
+    {
         $adfsConfigurationDbTestResult = New-Object TestResult -ArgumentList($testName);
         $adfsConfigurationDb = (Get-WmiObject -namespace root/ADFS -class SecurityTokenService).Properties["ConfigurationDatabaseConnectionString"].Value;
         If ($adfsConfigurationDb.Contains("microsoft##wid") -or $adfsConfigurationDb.Contains("microsoft##ssee"))
@@ -21,32 +21,32 @@ Function TestIsWidRunning()
                 $adfsConfigurationDbTestResult.Result = [ResultType]::Fail;
                 $adfsConfigurationDbTestResult.Detail = "Current State of WID Service is: $widServiceState";
             }
-            $adfsConfigurationDbTestResult.Output = @{$serviceStateKey = $widServiceState; $serviceStartModeKey=$widService.StartMode}
+            $adfsConfigurationDbTestResult.Output = @{$serviceStateKey = $widServiceState; $serviceStartModeKey = $widService.StartMode}
             return $adfsConfigurationDbTestResult;
         }
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
+    }
 }
 
 # Ping Federation metadata page on localhost
 Function TestPingFederationMetadata()
 {
-   $testName = "PingFederationMetadata"
-   $exceptionKey = "PingFedmetadataException"
-   try
-   {
+    $testName = "PingFederationMetadata"
+    $exceptionKey = "PingFedmetadataException"
+    try
+    {
         $fedmetadataUrlTestResult = New-Object TestResult -ArgumentList($testName);
         $fedmetadataUrlTestResult.Output = @{$exceptionKey = "NONE"}
 
         $sslBinding = GetSslBinding
-        $fedmetadataUrl = "https://"+ $sslBinding.HostNamePort + "/federationmetadata/2007-06/federationmetadata.xml";
+        $fedmetadataUrl = "https://" + $sslBinding.HostNamePort + "/federationmetadata/2007-06/federationmetadata.xml";
         $webClient = New-Object net.WebClient;
         [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
         try
@@ -61,17 +61,15 @@ Function TestPingFederationMetadata()
             $fedmetadataUrlTestResult.Output.Set_Item($exceptionKey, $exceptionEncoded)
         }
         return $fedmetadataUrlTestResult;
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList ($testName)
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList ($testName)
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
-
-
+    }
 }
 
 Function TestSslBindings()
@@ -86,7 +84,7 @@ Function TestSslBindings()
     $sslBindingsTestResult = New-Object TestResult -ArgumentList $testName
     $isAdfsServiceRunning = IsAdfsServiceRunning;
 
-    if(Test-RunningOnAdfsSecondaryServer)
+    if (Test-RunningOnAdfsSecondaryServer)
     {
         return Create-NotRunOnSecondaryTestResult $testName
     }
@@ -114,7 +112,7 @@ Function TestSslBindings()
             {
                 $sslBindingsTestDetail += "SSL Binding missing for port $httpsPort, AD FS requests will fail.";
             }
-            $sslOutputs.Set_Item($sslBindingsKey,$adfsSslBindings)
+            $sslOutputs.Set_Item($sslBindingsKey, $adfsSslBindings)
         }
         else
         {
@@ -132,7 +130,7 @@ Function TestSslBindings()
                 }
                 else
                 {
-                    $sslOutputs.Set_Item($sslBindingsKey,$sslBinding)
+                    $sslOutputs.Set_Item($sslBindingsKey, $sslBinding)
                 }
             }
         }
@@ -143,11 +141,12 @@ Function TestSslBindings()
             $sslBindingsTestResult.Result = [ResultType]::Fail;
             $sslBindingsTestResult.Detail = $sslBindingsTestDetail;
         }
-        return $sslBindingsTestResult;
 
+        return $sslBindingsTestResult;
     }
-    catch [Exception] {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
@@ -157,11 +156,10 @@ Function TestSslBindings()
 
 function Test-AdfsCertificates ()
 {
-
     $primaryCertificateTypes = @("Service-Communications", "Token-Decrypting", "Token-Signing", "SSL")
     $secondaryCerticateTypes = $primaryCertificateTypes | ? {$_ -ne "Service-Communications" -and $_ -ne "SSL"}
 
-    $primaryValues = @{$true=$primaryCertificateTypes; $false = $secondaryCerticateTypes}
+    $primaryValues = @{$true = $primaryCertificateTypes; $false = $secondaryCerticateTypes}
 
     $results = @()
 
@@ -200,7 +198,6 @@ function Test-AdfsCertificates ()
         return $results
     }
 
-
     $certsToCheck = Get-AdfsCertificatesToTest
     foreach ($isPrimary in $primaryValues.Keys)
     {
@@ -208,7 +205,7 @@ function Test-AdfsCertificates ()
         {
             $adfsCerts = @($certsToCheck | where {$_.CertificateType -eq $certType -and $_.IsPrimary -eq $isPrimary})
 
-            foreach($adfsCert in $adfsCerts)
+            foreach ($adfsCert in $adfsCerts)
             {
                 if ($null -eq $adfsCert)
                 {
@@ -244,18 +241,20 @@ function Test-AdfsCertificates ()
             }
         }
     }
+
     return $results
 }
 
 Function TestADFSDNSHostAlias
 {
-   $testName = "CheckFarmDNSHostResolution"
-   $farmNameKey = "FarmName"
-   $resolvedHostKey = "ResolvedHost"
-   $serviceAccountKey = "AdfsServiceAccount"
-   $errorKey = "ErrorMessage"
-   try
-   {
+    $testName = "CheckFarmDNSHostResolution"
+    $farmNameKey = "FarmName"
+    $resolvedHostKey = "ResolvedHost"
+    $serviceAccountKey = "AdfsServiceAccount"
+    $errorKey = "ErrorMessage"
+
+    try
+    {
         if (Test-RunningOnAdfsSecondaryServer)
         {
             return Create-NotRunOnSecondaryTestResult $testName
@@ -294,23 +293,23 @@ Function TestADFSDNSHostAlias
         $testResult.Output = @{$farmNameKey = $farmName; $resolvedHostKey = $resolvedHostName; $serviceAccountKey = $serviceAccountName}
 
         return $testResult
-   }
-   catch [System.Net.Sockets.SocketException]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [System.Net.Sockets.SocketException]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::Fail;
-        $testResult.Detail = "Could not resolve the farm name {0} with exception '{1}'" -f $farmName,$_.Exception.Message;
+        $testResult.Detail = "Could not resolve the farm name {0} with exception '{1}'" -f $farmName, $_.Exception.Message;
         $testResult.Output = @{$farmNameKey = $farmName; $serviceAccountKey = $serviceAccountName; $errorKey = $_.Exception.ToString()}
         return $testResult;
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
+    }
 }
 
 Function TestADFSDuplicateSPN
@@ -333,7 +332,7 @@ Function TestADFSDuplicateSPN
         if (IsLocalUser -eq $true)
         {
             $testResult.Result = [ResultType]::NotRun
-            $testResult.Detail = "Current user "+ $env:USERNAME + " is not a domain account. Cannot execute this test"
+            $testResult.Detail = "Current user " + $env:USERNAME + " is not a domain account. Cannot execute this test"
             return $testResult
         }
 
@@ -402,7 +401,7 @@ Function TestADFSDuplicateSPN
             $testDetail = "Multiple objects are found in the directory with SPN:" + $farmSPN + [System.Environment]::NewLine + "Objects with SPN: " + [System.Environment]::NewLine
             $spnObjects = @()
 
-            for($i = 0; $i -lt $spnResults.Count; $i++)
+            for ($i = 0; $i -lt $spnResults.Count; $i++)
             {
                 $testDetail += $spnResults[$i].Properties.distinguishedname + [System.Environment]::NewLine
                 $spnObjects += $spnResults[$i].Properties.distinguishedname
@@ -441,16 +440,15 @@ Function TestADFSDuplicateSPN
                 return $testResult
             }
         }
-
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = "Exception Occurred: " + [System.Environment]::NewLine + $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
+    }
 }
 
 Function TestServiceAccountProperties
@@ -465,11 +463,12 @@ Function TestServiceAccountProperties
     $acctLockedKey = "AdfsServiceAccountLockedOut"
 
     $testResult.Output = @{`
-        $serviceAcctKey = $none;`
-        $userAcctCtrlKey = $none;`
-        $acctDisabledKey = $none;`
-        $acctPwdExpKey = $none;`
-        $acctLockedKey = $none}
+            $serviceAcctKey  = $none; `
+            $userAcctCtrlKey = $none; `
+            $acctDisabledKey = $none; `
+            $acctPwdExpKey   = $none; `
+            $acctLockedKey   = $none
+    }
 
     try
     {
@@ -496,7 +495,7 @@ Function TestServiceAccountProperties
             $testResult.Output.Set_Item($userAcctCtrlKey, $founduser.psbase.properties.useraccountcontrol[0])
 
             $accountDisabled = $founduser.psbase.properties.useraccountcontrol[0] -band 0x02
-            $testResult.Output.Set_Item($acctDisabledKey,$accountDisabled)
+            $testResult.Output.Set_Item($acctDisabledKey, $accountDisabled)
 
             $pwExpired = $founduser.psbase.properties.useraccountcontrol[0] -band 0x800000
             $testResult.Output.Set_Item($acctPwdExpKey, $pwExpired)
@@ -537,7 +536,7 @@ Function TestAppPoolIDMatchesServiceID()
     $testResult = New-Object TestResult -ArgumentList ($testName)
     $pipelineModeKey = "AdfsAppPoolPipelineMode"
 
-    if($adfsVersion -ne $adfs2x)
+    if ($adfsVersion -ne $adfs2x)
     {
         $testResult.Result = [ResultType]::NotRun
         $testResult.Detail = "Test only to be run on ADFS 2.0"
@@ -626,12 +625,11 @@ Function TestSSLUsingADFSPort()
     $httpsPortKey = "AdfsHttpsPort"
     $sslBindingsKey = "AdfsSSLBindings"
 
-
     $testResult.Output = @{$sslTpKey = $none; $httpsPortKey = $none; $sslBindingsKey = $none}
 
     try
     {
-        if($adfsVersion -ne $adfs2x)
+        if ($adfsVersion -ne $adfs2x)
         {
             $testResult.Result = [ResultType]::NotRun
             $testResult.Detail = "Test only to be run on ADFS 2.0 Machine"
@@ -656,7 +654,7 @@ Function TestSSLUsingADFSPort()
         $testResult.Output.Set_Item($sslTpKey, $AdfsCertThumbprint)
         $testResult.Output.Set_Item($httpsPortKey, $httpsPort)
 
-        if(($SSLPortMatch | measure).Count -gt 0)
+        if (($SSLPortMatch | measure).Count -gt 0)
         {
             $testResult.Output.Set_Item($sslBindingsKey, $SSLPortMatchStrs)
             $sslMatches = "SSL Port Matches:`n"
@@ -705,13 +703,13 @@ Function TestSSLCertSubjectContainsADFSFarmName()
         }
 
         $sslCertHashes = @()
-        switch($adfsVersion)
+        switch ($adfsVersion)
         {
             $adfs3
             {
                 foreach ($sslCert in (Get-AdfsSslCertificate))
                 {
-                    if(-not $sslCertHashes.Contains($sslCert.CertificateHash))
+                    if (-not $sslCertHashes.Contains($sslCert.CertificateHash))
                     {
                         $sslCertHashes += $sslCert.CertificateHash
                     }
@@ -747,14 +745,14 @@ Function TestSSLCertSubjectContainsADFSFarmName()
             {
                 $failureOutput += "SANs:`n"
                 $sanObjs = new-object -ComObject X509Enrollment.CX509ExtensionAlternativeNames
-                $altNamesStr=[System.Convert]::ToBase64String($sanExt.RawData)
+                $altNamesStr = [System.Convert]::ToBase64String($sanExt.RawData)
                 $sanObjs.InitializeDecode(1, $altNamesStr)
                 Foreach ($SAN in $sanObjs.AlternativeNames)
                 {
                     $strValue = $SAN.strValue
                     $searchFilter = $strValue -replace "\*", "[\w-]+"
                     $searchFilter = "^" + $searchFilter + "$"
-                    if($farmName -match $searchFilter)
+                    if ($farmName -match $searchFilter)
                     {
                         $testResult.Result = [ResultType]::Pass
                         return $testResult
@@ -770,7 +768,7 @@ Function TestSSLCertSubjectContainsADFSFarmName()
                     $searchFilter = $certToCheck.Subject.Split(",=")[1]
                     $searchFilter = $searchFilter -replace "\*", "[\w-]+"
                     $searchFilter = "^" + $searchFilter + "$"
-                    if($farmName -match $searchFilter)
+                    if ($farmName -match $searchFilter)
                     {
                         $testResult.Result = [ResultType]::Pass
                         return $testResult
@@ -800,39 +798,39 @@ Function TestAdfsAuditPolicyEnabled
     $stsAuditSetting = "StsAuditConfig"
 
     $testResult.Output = @{`
-        $auditSettingKey = $none;
-        $stsAuditSetting = $none;
+            $auditSettingKey = $none;
+        $stsAuditSetting     = $none;
     }
 
     try
     {
-       $auditPolicy = auditpol /get /subcategory:"{0cce9222-69ae-11d9-bed3-505054503030}" /r | ConvertFrom-Csv
-       $auditSetting = $auditPolicy."Inclusion Setting"
+        $auditPolicy = auditpol /get /subcategory:"{0cce9222-69ae-11d9-bed3-505054503030}" /r | ConvertFrom-Csv
+        $auditSetting = $auditPolicy."Inclusion Setting"
 
-       $testResult.Output.Set_Item($auditSettingKey, $auditSetting);
+        $testResult.Output.Set_Item($auditSettingKey, $auditSetting);
 
-       if ($auditSetting -ne "Success and Failure")
-       {
+        if ($auditSetting -ne "Success and Failure")
+        {
             $testResult.Result = [ResultType]::Fail
             $testResult.Detail = "Audits are not configured for Usage data collection : Expected 'Success and Failure', Actual='$auditSetting'"
-       }
-       else
-       {
+        }
+        else
+        {
             #So far, passing if we have the right policy
             $testResult.Result = [ResultType]::Pass
-       }
+        }
 
-       #and verify the STS audit setting
-       $role = Get-AdfsRole
-       if ($role -eq "STS")
-       {
-           $adfsSyncSetting = (Get-ADFSSyncProperties).Role
-           if (IsAdfsSyncPrimaryRole)
-           {
+        #and verify the STS audit setting
+        $role = Get-AdfsRole
+        if ($role -eq "STS")
+        {
+            $adfsSyncSetting = (Get-ADFSSyncProperties).Role
+            if (IsAdfsSyncPrimaryRole)
+            {
                 $audits = (Retrieve-AdfsProperties).LogLevel | where {$_ -like "*Audits"} | Sort-Object
 
                 $auditsStr = ""
-                foreach($audit in $audits)
+                foreach ($audit in $audits)
                 {
                     $auditsStr = $auditsStr + $audit + ";"
                 }
@@ -843,12 +841,12 @@ Function TestAdfsAuditPolicyEnabled
                     $testResult.Result = [ResultType]::Fail
                     $testResult.Detail = $testResult.Detail + " ADFS Audits are not configured : Expected 'FailureAudits;SuccessAudits', Actual='$auditsStr'"
                 }
-           }
-           else
-           {
+            }
+            else
+            {
                 #Did not run on a secondary. Cannot make any assertions on whether this part of the test failed or not
                 $testResult.Output.Set_Item($stsAuditSetting, "(Cannot get this data from secondary node)");
-           }
+            }
         }
         else
         {
@@ -912,7 +910,7 @@ Function TestAdfsRequestToken($retryThreshold = 5, $sleepSeconds = 3)
             $tokenString = ""
             #attempt to load first the synthetic transactions library, and fallback to the simpler version
             ipmo .\Microsoft.Identity.Health.SyntheticTransactions.dll -ErrorAction SilentlyContinue -ErrorVariable synthTxErrVar
-            if($synthTxErrVar -ne $null)
+            if ($synthTxErrVar -ne $null)
             {
                 [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
                 $sslBinding = GetSslBinding
@@ -963,8 +961,8 @@ Function TestOffice365Endpoints()
     $passiveKey = "PassiveEnabled"
     $passiveProxyKey = "PassiveProxyEnabled"
 
-   try
-   {
+    try
+    {
         if (Test-RunningOnAdfsSecondaryServer)
         {
             return Create-NotRunOnSecondaryTestResult $testName
@@ -1020,23 +1018,24 @@ Function TestOffice365Endpoints()
                 + $passive.AddressPath + "`n  Enabled: " + $passive.Enabled + "`n  Proxy Enabled: " + $passive.Proxy + "`n";
         }
         $lyncEndpointsTestResult.Output = @{`
-            $wstrustUsernameKey = $wstrust2005usernamemixed.Enabled;`
-            $wsTrustUsernameProxyKey = $wstrust2005usernamemixed.Proxy;`
-            $wsTrustWindowsKey = $wstrust2005windowstransport.Enabled;`
-            $wsTrustWindowsProxyKey = $wstrust2005windowstransport.Proxy;`
-            $passiveKey = $passive.Enabled;`
-            $passiveProxyKey = $passive.Proxy}
+                $wstrustUsernameKey      = $wstrust2005usernamemixed.Enabled; `
+                $wsTrustUsernameProxyKey = $wstrust2005usernamemixed.Proxy; `
+                $wsTrustWindowsKey       = $wstrust2005windowstransport.Enabled; `
+                $wsTrustWindowsProxyKey  = $wstrust2005windowstransport.Proxy; `
+                $passiveKey              = $passive.Enabled; `
+                $passiveProxyKey         = $passive.Proxy
+        }
 
         return $lyncEndpointsTestResult;
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
+    }
 
 }
 
@@ -1050,8 +1049,8 @@ Function TestADFSO365RelyingParty
     $rpEnabledKey = "MicrosoftOnlineRPEnabled"
     $rpSignAlgKey = "MicrosoftOnlineRPSignatureAlgorithm"
 
-   try
-   {
+    try
+    {
         if (Test-RunningOnAdfsSecondaryServer)
         {
             return Create-NotRunOnSecondaryTestResult $testName
@@ -1059,10 +1058,11 @@ Function TestADFSO365RelyingParty
 
         $testResult = New-Object TestResult -ArgumentList ($testName)
         $testResult.Output = @{`
-            $rpIdKey = $aadRpId ;`
-            $rpNameKey = $none ;`
-            $rpEnabledKey = $none ;`
-            $rpSignAlgKey = $none}
+                $rpIdKey      = $aadRpId ; `
+                $rpNameKey    = $none ; `
+                $rpEnabledKey = $none ; `
+                $rpSignAlgKey = $none
+        }
 
         $isAdfsServiceRunning = IsAdfsServiceRunning
 
@@ -1074,7 +1074,7 @@ Function TestADFSO365RelyingParty
         }
         $aadRpName = "Microsoft Office 365 Identity Platform"
 
-        $aadRp =  Get-ADFSRelyingPartyTrust -Identifier $aadRpId
+        $aadRp = Get-ADFSRelyingPartyTrust -Identifier $aadRpId
 
         if ($aadRp -eq $null)
         {
@@ -1091,20 +1091,20 @@ Function TestADFSO365RelyingParty
         {
             $testResult.Result = [ResultType]::Fail;
             $testResult.Detail += $aadRpName + " Relying Party trust is disabled`n"
-            $testResult.Detail += "Relying Party Trust Display Name: " + $aadRp.Name +"`n";
-            $testResult.Detail += "Relying Party Trust Identifier: " + $aadRp.Identifier +"`n";
+            $testResult.Detail += "Relying Party Trust Display Name: " + $aadRp.Name + "`n";
+            $testResult.Detail += "Relying Party Trust Identifier: " + $aadRp.Identifier + "`n";
             $aadRpDetail = $true
             $testPassed = $false
         }
 
-        if ($aadRp.SignatureAlgorithm  -ne "http://www.w3.org/2000/09/xmldsig#rsa-sha1")
+        if ($aadRp.SignatureAlgorithm -ne "http://www.w3.org/2000/09/xmldsig#rsa-sha1")
         {
             $testResult.Result = [ResultType]::Fail;
             $testResult.Detail += $aadRpName + " Relying Party token signature algorithm is not SHA1`n";
             if (-not $aadRpDetail)
             {
-                $testResult.Detail += "Relying Party Trust Display Name: " + $aadRp.Name +"`n";
-                $testResult.Detail += "Relying Party Trust Identifier: " + $aadRp.Identifier +"`n";
+                $testResult.Detail += "Relying Party Trust Display Name: " + $aadRp.Name + "`n";
+                $testResult.Detail += "Relying Party Trust Identifier: " + $aadRp.Identifier + "`n";
             }
             $testResult.Detail += "Relying Party Trust Signature Algorithm: " + $aadRp.SignatureAlgorithm;
             $testPassed = $false
@@ -1119,15 +1119,15 @@ Function TestADFSO365RelyingParty
         $testResult.Output.Set_Item($rpSignAlgKey, $aadRp.SignatureAlgorithm)
 
         return $testResult
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
+    }
 }
 
 Function TestNtlmOnlySupportedClientAtProxyEnabled
@@ -1160,21 +1160,20 @@ Function TestNtlmOnlySupportedClientAtProxyEnabled
             return $ntlmClientTestResult;
         }
 
-        if($adfsProperties.NtlmOnlySupportedClientAtProxy -eq $false)
+        if ($adfsProperties.NtlmOnlySupportedClientAtProxy -eq $false)
         {
             $ntlmClientTestResult.Result = [ResultType]::Fail;
             $ntlmClientTestResult.Detail = "NtlmOnlySupportedClientAtProxy is disabled; extranet users can experience authentication failure.`n";
         }
         $ntlmClientTestResult.Output = @{$outputKey = $adfsProperties.NtlmOnlySupportedClientAtProxy}
         return $ntlmClientTestResult
-   }
-   catch [Exception]
-   {
-        $testResult= New-Object TestResult -ArgumentList($testName);
+    }
+    catch [Exception]
+    {
+        $testResult = New-Object TestResult -ArgumentList($testName);
         $testResult.Result = [ResultType]::NotRun;
         $testResult.Detail = $_.Exception.Message;
         $testResult.ExceptionMessage = $_.Exception.Message
         return $testResult;
-   }
-
+    }
 }

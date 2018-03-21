@@ -26,22 +26,14 @@
 #Get public and private function definition files.
 Write-Debug "ADFSDiagnostics: Importing public and private functions";
 
-$Public  = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue)
+$Public = @(Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue)
 $Private = @(Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue)
 #Dot source the files
-foreach($import in @($Public + $Private))
+foreach ($import in @($Public + $Private))
 {
     try
     {
-        Write-Debug "Verifying authenticode signature of $($import.fullname)";
-        if((Get-AuthenticodeSignature $import.fullname).Status -eq "Valid")
-        {
-            . $import.fullname
-        }
-        else
-        {
-            Write-Error -Message "Failed to import $($import.fullname) because the authenticode signature was not valid.";
-        }
+        . $import.fullname
     }
     catch
     {

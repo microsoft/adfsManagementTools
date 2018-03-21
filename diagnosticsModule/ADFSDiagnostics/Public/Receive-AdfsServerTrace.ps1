@@ -28,7 +28,7 @@ Function Receive-AdfsServerTrace
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [array]$Jobs
     )
 
@@ -41,13 +41,13 @@ Function Receive-AdfsServerTrace
 
         Write-Progress -Activity $activity -Status "Merging and sorting events found"
         $combined = @()
-        foreach($job in $jobs)
+        foreach ($job in $jobs)
         {
             $result = $job | Get-Job -IncludeChildJob | Receive-Job -ErrorAction SilentlyContinue
             $combined = $combined + [array]$result
         }
 
-        $combinedSorted = $combined | Sort-Object TimeCreated,SortKey,EventRecordID | Select-Object ComputerName,Source,TimeCreated,EventId,Message,Details,Details2
+        $combinedSorted = $combined | Sort-Object TimeCreated, SortKey, EventRecordID | Select-Object ComputerName, Source, TimeCreated, EventId, Message, Details, Details2
 
         Write-Output $combinedSorted
     }
