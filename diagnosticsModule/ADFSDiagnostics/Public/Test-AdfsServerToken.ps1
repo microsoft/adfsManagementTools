@@ -76,7 +76,10 @@ Function Test-AdfsServerToken
             $appliesTo)
     }
 
+    $oldProtocol = [Net.ServicePointManager]::SecurityProtocol
+    [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12'
     $webresp = Invoke-WebRequest $endpoint -Method Post -Body $rst -ContentType "application/soap+xml" -UseDefaultCredentials -UseBasicParsing
+    [Net.ServicePointManager]::SecurityProtocol = $oldProtocol
     $tokenXml = [xml]$webresp.Content
     return $tokenXml.OuterXml
 }
