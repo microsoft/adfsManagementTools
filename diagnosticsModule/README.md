@@ -153,6 +153,9 @@ This module provides cmdlets that can be used to perform various tests on AD FS 
 * **FederationServer**: Federation Server (Farm) host name Federation Server (Farm) host name
 * **AppliesTo**: Identifier of the target relying party
 * **Credential**: Optional Username Credential used to retrieve the token
+* **TestTls10**: Optional switch to specify performing a synthetic transaction using Tls 1.0
+* **TestTls11**: Optional switch to specify performing a synthetic transaction using Tls 1.1
+* **TestTls12**: Optional switch to specify performing a synthetic transaction using Tls 1.2
 
 **Usage**: `Test-AdfsServerToken -FederationServer sts.contoso.com -AppliesTo urn:examplerpt`
 

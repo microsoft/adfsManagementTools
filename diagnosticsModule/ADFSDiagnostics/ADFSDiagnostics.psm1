@@ -26,6 +26,7 @@ $ModuleVersion = "2.1.0"
 
 $url = "https://api.github.com/repos/Microsoft/adfsManagementTools/releases/latest"
 $oldProtocol = [Net.ServicePointManager]::SecurityProtocol
+# We switch to using TLS 1.2 because GitHub closes the connection if it uses 1.0 or 1.1
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 try
 {
